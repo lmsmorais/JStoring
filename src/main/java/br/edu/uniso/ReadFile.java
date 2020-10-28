@@ -11,6 +11,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.Iterator;
 
 public class ReadFile {
@@ -29,6 +33,12 @@ public class ReadFile {
                 wb = new XSSFWorkbook(fis);
             }
 
+            Connection c = DriverManager.getConnection("jdbc:mysql://34.225.155.37:3306/tiopalma_sempermissao",
+                    "root","rootdotiozao");
+
+            PreparedStatement ps = c.prepareStatement("insert into VENDEDORES(cpf, nome, idade) values " +
+                    "(?,?,?)");
+
             Sheet planilha1 = wb.getSheetAt(0);
 
             Iterator<Row> rows = planilha1.iterator();
@@ -38,26 +48,26 @@ public class ReadFile {
                 Iterator<Cell> celulas = row.cellIterator();
                 while(celulas.hasNext()) {
                     Cell coluna = celulas.next();
-                    if (coluna.getCellType() == Cell.CELL_TYPE_NUMERIC)
-                        System.out.print("\t" + coluna.getNumericCellValue());
+                    if (coluna.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                        Double dado = coluna.getNumericCellValue();
+                        ps.setDouble(1, dado);
+                    }
 
-                    if (coluna.getCellType() == Cell.CELL_TYPE_STRING)
-                    System.out.print("\t" + coluna.getStringCellValue());
-                    System.out.println();
-
+                    if (coluna.getCellType() == Cell.CELL_TYPE_STRING){
+                        String dado = coluna.getStringCellValue();
+                        ps.setString(2,dado);
+                    }
+                    
                 }
 
             }
-
-
-
-
-
 
         }catch(FileNotFoundException e){
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
         }
 
     }
