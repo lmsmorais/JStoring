@@ -11,10 +11,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.Iterator;
 
 public class ReadFile {
@@ -33,41 +29,33 @@ public class ReadFile {
                 wb = new XSSFWorkbook(fis);
             }
 
-            Connection c = DriverManager.getConnection("jdbc:mysql://34.225.155.37:3306/tiopalma_sempermissao",
-                    "root","rootdotiozao");
 
-            PreparedStatement ps = c.prepareStatement("insert into VENDEDORES(cpf, nome, idade) values " +
-                    "(?,?,?)");
 
             Sheet planilha1 = wb.getSheetAt(0);
 
             Iterator<Row> rows = planilha1.iterator();
+            rows.next();
             while(rows.hasNext()){
                 Row row = rows.next();
 
                 Iterator<Cell> celulas = row.cellIterator();
-                while(celulas.hasNext()) {
-                    Cell coluna = celulas.next();
-                    if (coluna.getCellType() == Cell.CELL_TYPE_NUMERIC) {
-                        Double dado = coluna.getNumericCellValue();
-                        ps.setDouble(1, dado);
-                    }
+                
+                    Cell coluna1 = celulas.next();
+                    String nome = coluna1.getStringCellValue();
 
-                    if (coluna.getCellType() == Cell.CELL_TYPE_STRING){
-                        String dado = coluna.getStringCellValue();
-                        ps.setString(2,dado);
-                    }
-                    
-                }
+                    Cell coluna2 = celulas.next();
+                    int idade = (int)coluna2.getNumericCellValue();
 
+                    Cell coluna3 = celulas.next();
+                    String cpf = coluna3.getStringCellValue();
+
+                    mysql.enfiandoNoBanco(nome,idade,cpf);
             }
 
         }catch(FileNotFoundException e){
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
         }
 
     }
